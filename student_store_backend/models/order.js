@@ -8,25 +8,33 @@ class Order {
     }
 
     static async createOrder(order, user) {
-        const requiredFields = ("customer_id")
-        requiredFields.forEach(field => {
+        const requiredUserFields = ["email"]
+        requiredUserFields.forEach(field => {
+            if(!user.hasOwnProperty(field)) {
+                throw new BadRequestError(`Required filed "${field}" missing from request body`)
+            }
+        })
+
+        const requiredOrderFields = ["id", "quantity"]
+        requiredOrderFields.forEach(field => {
             if(!order.hasOwnProperty(field)) {
                 throw new BadRequestError(`Required filed "${field}" missing from request body`)
             }
         })
 
-        
-
         const results = await db.query(
             `
                 INSERT INTO orders (customer_id)
-                VALUES ($1)
+                VALUES ((SELECT id FROM users WHERE email = $1))
                 RETURNING id, customer_id, created_at
-            `, [order.customer_id]
+            `, [user.email]
         )
+        
+        let orderId = results.rows[0].id
 
-        return results.rows[0]
+        order.forEach((product) => {
 
+        })
     }
 }
 
